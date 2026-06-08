@@ -354,20 +354,33 @@ function keepSeatsClearOfCore(points, totalSeats) {
   return keepSeatsOutsideCenter(points, minimumDistance);
 }
 
-function getOuterGuideRingRadius(totalSeats) {
-  const guideRings = totalSeats <= 8
+function getGuideRings(totalSeats) {
+  return totalSeats <= 8
     ? [20, 28, 35, 43]
     : totalSeats <= 14
       ? [21, 29, 36, 43]
       : totalSeats <= 20
         ? [22, 30, 37, 43]
         : [22, 31, 38, 43];
+}
 
+function getOuterGuideRingRadius(totalSeats) {
+  const guideRings = getGuideRings(totalSeats);
   return guideRings[guideRings.length - 1];
 }
 
+function getSeatPlacementRadius(totalSeats) {
+  const guideRings = getGuideRings(totalSeats);
+
+  if (guideRings.length < 2) {
+    return guideRings[guideRings.length - 1];
+  }
+
+  return (guideRings[guideRings.length - 2] + guideRings[guideRings.length - 1]) / 2;
+}
+
 function snapSeatsToGuideRings(points, totalSeats) {
-  const outerRingRadius = getOuterGuideRingRadius(totalSeats);
+  const seatPlacementRadius = getSeatPlacementRadius(totalSeats);
 
   return points.map((point) => {
     const offsetX = point.x - 50;
@@ -378,7 +391,7 @@ function snapSeatsToGuideRings(points, totalSeats) {
       return point;
     }
 
-    const scale = outerRingRadius / distanceFromCenter;
+    const scale = seatPlacementRadius / distanceFromCenter;
 
     return {
       ...point,
@@ -424,11 +437,11 @@ function findArcLengthAtRadians(arcTable, targetRadians) {
 }
 
 function buildSeatPositions(totalSeats) {
-  const outerRingRadius = getOuterGuideRingRadius(totalSeats);
+  const seatPlacementRadius = getSeatPlacementRadius(totalSeats);
   const seatStep = totalSeats > 0 ? (Math.PI * 2) / totalSeats : 0;
   const startAngle = (seatStep / 2) - (Math.PI / 2);
-  const horizontalRadius = outerRingRadius;
-  const verticalRadius = outerRingRadius;
+  const horizontalRadius = seatPlacementRadius;
+  const verticalRadius = seatPlacementRadius;
 
   return Array.from({ length: totalSeats }, (_, index) => {
     const angle = startAngle + (index * seatStep);
