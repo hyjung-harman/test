@@ -791,9 +791,10 @@ function renderResult(result) {
   const seatCount = result.seatMap.length;
 
   seatMap.innerHTML = `
-    <div class="seat-map-core glass">
-      <span>Boat Deck</span>
-      <strong>${result.totalSeats}석</strong>
+    <div class="seat-map-core glass" id="seatMapCore">
+      <span id="seatMapCoreLabel">Boat Deck</span>
+      <strong id="seatMapCoreValue">${result.totalSeats}석</strong>
+      <small id="seatMapCoreDetail">좌석을 누르면 정보가 표시됩니다.</small>
     </div>
     ${result.seatMap.map((seat, index) => {
     const seatNumber = index + 1;
@@ -806,7 +807,7 @@ function renderResult(result) {
           ? `--seat-cell-bg: ${getSoloSeatColor()}; --seat-number-color: ${getSoloSeatNumberColor()};`
           : `--seat-cell-bg: ${getBlockSeatColor(seat.blockId)}; --seat-number-color: ${getBlockSeatNumberColor(seat.blockId)};`;
     return `
-      <div class="seat-cell ${seat.kind}" role="button" tabindex="0" aria-pressed="false" aria-label="${seatNumber}번 ${label}" style="left: ${position.x}%; top: ${position.y}%; ${blockColorStyle}">
+      <div class="seat-cell ${seat.kind}" role="button" tabindex="0" aria-pressed="false" aria-label="${seatNumber}번 ${label}" data-seat-number="${seatNumber}" data-seat-label="${label}" data-seat-kind="${seat.kind}" style="left: ${position.x}%; top: ${position.y}%; ${blockColorStyle}">
         <span class="seat-cell-number">${seatNumber}번</span>
         <span class="seat-cell-name">${displayLabel}</span>
       </div>
@@ -814,6 +815,10 @@ function renderResult(result) {
   }).join("")}
   `;
 
+  const seatMapCoreLabel = getElement("seatMapCoreLabel");
+  const seatMapCoreValue = getElement("seatMapCoreValue");
+  const seatMapCoreDetail = getElement("seatMapCoreDetail");
+  const seatMapCore = getElement("seatMapCore");
   const seatCells = Array.from(seatMap.querySelectorAll(".seat-cell"));
   let selectedSeatCell = null;
   let selectedSeatTimer = null;
@@ -838,6 +843,10 @@ function renderResult(result) {
 
     seatPopupLayer.innerHTML = "";
     selectedSeatCell.setAttribute("aria-pressed", "false");
+    seatMapCore.classList.remove("is-seat-selected");
+    seatMapCoreLabel.textContent = "Boat Deck";
+    seatMapCoreValue.textContent = `${result.totalSeats}석`;
+    seatMapCoreDetail.textContent = "좌석을 누르면 정보가 표시됩니다.";
     selectedSeatCell = null;
   };
 
@@ -849,6 +858,14 @@ function renderResult(result) {
     clearSelectedSeat();
     selectedSeatCell = seatCell;
     selectedSeatCell.setAttribute("aria-pressed", "true");
+
+  const seatNumber = seatCell.dataset.seatNumber ?? "";
+  const seatLabel = seatCell.dataset.seatLabel ?? "";
+  const seatKind = seatCell.dataset.seatKind ?? "";
+  seatMapCore.classList.add("is-seat-selected");
+  seatMapCoreLabel.textContent = seatKind === "solo" ? "솔로 좌석" : seatKind === "group" ? "단체 좌석" : seatKind === "family" ? "가족 좌석" : "빈 좌석";
+  seatMapCoreValue.textContent = `${seatNumber}번`;
+  seatMapCoreDetail.textContent = seatLabel;
 
     const seatRect = seatCell.getBoundingClientRect();
     const popupSeat = seatCell.cloneNode(true);

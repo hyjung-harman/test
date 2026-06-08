@@ -705,13 +705,33 @@ button {
 .seat-map-core small {
   color: var(--muted);
   line-height: 1.4;
+  transition: color 0.18s ease, font-size 0.18s ease, letter-spacing 0.18s ease, font-weight 0.18s ease;
+}
+
+.seat-map-core.is-seat-selected small {
+  color: #ffffff;
+  font-size: 1.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.16;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    0 0 10px rgba(126, 224, 255, 0.28);
+}
+
+.seat-map-core.is-seat-selected {
+  gap: 2px;
+}
+
+.seat-map-core.is-seat-selected strong {
+  transform: translateY(-12px);
 }
 
 .seat-cell {
   position: absolute;
-  width: clamp(52px, 5.4vw, 65px);
-  min-height: clamp(58px, 6vw, 72px);
-  padding: 6px 5px 5px;
+  width: clamp(47px, 4.9vw, 59px);
+  min-height: clamp(52px, 5.4vw, 65px);
+  padding: 5px 4px 4px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: var(--seat-cell-bg, rgba(255, 255, 255, 0.05));
@@ -864,9 +884,9 @@ button {
   }
 
   .seat-cell {
-    width: clamp(52px, 5.4vw, 65px);
-    min-height: clamp(58px, 6vw, 72px);
-    padding: 6px 5px 5px;
+    width: clamp(47px, 4.9vw, 59px);
+    min-height: clamp(52px, 5.4vw, 65px);
+    padding: 5px 4px 4px;
   }
 
   .seat-cell-name {
