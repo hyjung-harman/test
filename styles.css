@@ -519,11 +519,11 @@ button {
 
 .stat-card {
   border-radius: var(--radius-lg);
-  padding: 14px 18px;
+  padding: 13px 18px;
 }
 
 .result-summary-grid .stat-card span {
-  font-size: 0.66rem;
+  font-size: 0.83rem;
   line-height: 1.2;
 }
 
