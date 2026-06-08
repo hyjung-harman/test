@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>보트 낚시 좌석 배정 - 결과</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body class="page-shell page-result">
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+  <div class="bg-grid"></div>
+
+  <main class="app-frame result-frame">
+    <header class="result-header glass">
+      <div>        
+        <h1>좌석 배정 결과</h1>        
+      </div>
+      <div class="header-actions">
+        <a class="ghost-btn link-btn" href="index.html">설정으로 돌아가기</a>
+      </div>
+    </header>
+
+    <section class="result-summary-grid">
+      <article class="glass stat-card">
+        <span>전체 좌석</span>
+        <strong id="totalSeatStat">0</strong>
+      </article>
+      <article class="glass stat-card">
+        <span>배정 인원</span>
+        <strong id="assignedPeopleStat">0</strong>
+      </article>
+      <article class="glass stat-card">
+        <span>분리 좌석</span>
+        <strong id="separatedSeatStat">0</strong>
+      </article>
+    </section>
+
+    <section class="result-layout">
+      <aside class="glass panel map-panel">
+        <div class="panel-head">
+          <h2>좌석 맵</h2>
+          <p>좌석은 원형으로 배치되고, 가운데 코어를 기준으로 선체 둘레를 따라 표시됩니다.</p>
+        </div>
+        <div id="seatMap" class="seat-map"></div>
+      </aside>
+
+      <div class="glass panel result-panel">
+        <div class="panel-head">
+          <h2>좌석 목록</h2>
+          <p>연속 배정된 팀은 범위로, 솔로는 개별 좌석으로 표시됩니다. 단체와 가족도 분리 좌석을 포함할 수 있지만, 한 블록당 최대 1석만 허용됩니다.</p>
+        </div>
+        <div id="seatList" class="seat-list"></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
