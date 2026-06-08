@@ -370,13 +370,7 @@ function getOuterGuideRingRadius(totalSeats) {
 }
 
 function getSeatPlacementRadius(totalSeats) {
-  const guideRings = getGuideRings(totalSeats);
-
-  if (guideRings.length < 2) {
-    return guideRings[guideRings.length - 1];
-  }
-
-  return (guideRings[guideRings.length - 2] + guideRings[guideRings.length - 1]) / 2;
+  return getOuterGuideRingRadius(totalSeats) * 0.95;
 }
 
 function snapSeatsToGuideRings(points, totalSeats) {

@@ -628,14 +628,16 @@ button {
 .seat-map {
   position: relative;
   width: min(100%, 520px);
-  aspect-ratio: 0.68;
+  aspect-ratio: 0.6181818182;
   margin: 0 auto;
+  transform: scaleX(1.1);
+  transform-origin: center;
   border-radius: 50%;
   overflow: hidden;
   isolation: isolate;
   background:
     radial-gradient(circle at center, rgba(126, 224, 255, 0.1), transparent 18%),
-    radial-gradient(circle at center, transparent 29%, rgba(255, 255, 255, 0.05) 29.35%, transparent 29.7%),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 16%, transparent 38%),
     radial-gradient(circle at center, rgba(255, 209, 102, 0.08), transparent 44%),
     linear-gradient(180deg, rgba(8, 18, 32, 0.78), rgba(5, 12, 22, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -646,15 +648,23 @@ button {
 .seat-map::after {
   content: "";
   position: absolute;
-  inset: 7%;
+  inset: 9.5%;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.06);
   pointer-events: none;
 }
 
+.seat-map::before {
+  border-color: rgba(255, 80, 80, 0.45);
+  transform: scaleX(0.94);
+  transform-origin: center;
+}
+
 .seat-map::after {
   inset: 20%;
   border-color: rgba(126, 224, 255, 0.12);
+  transform: scaleY(1.16);
+  transform-origin: center;
 }
 
 .seat-map-core {
@@ -699,7 +709,7 @@ button {
 
 .seat-cell {
   position: absolute;
-  width: clamp(58px, 6vw, 72px);
+  width: clamp(52px, 5.4vw, 65px);
   min-height: clamp(58px, 6vw, 72px);
   padding: 6px 5px 5px;
   border-radius: 18px;
@@ -827,7 +837,7 @@ button {
   }
 
   .seat-cell {
-    width: clamp(58px, 6vw, 72px);
+    width: clamp(52px, 5.4vw, 65px);
     min-height: clamp(58px, 6vw, 72px);
     padding: 6px 5px 5px;
   }
