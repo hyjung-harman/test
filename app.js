@@ -153,14 +153,23 @@ function orderBlocksBySize(blocks) {
     .flatMap(([, bucket]) => shuffle(bucket));
 }
 
+const GROUP_SEAT_COLOR_PALETTE = [
+  { bg: "hsla(210, 88%, 56%, 0.14)", number: "hsl(210, 94%, 76%)" },
+  { bg: "hsla(6, 88%, 58%, 0.14)", number: "hsl(6, 94%, 76%)" },
+  { bg: "hsla(160, 88%, 56%, 0.14)", number: "hsl(160, 94%, 74%)" },
+  { bg: "hsla(276, 88%, 60%, 0.14)", number: "hsl(276, 94%, 78%)" },
+  { bg: "hsla(338, 88%, 60%, 0.14)", number: "hsl(338, 94%, 78%)" },
+  { bg: "hsla(186, 88%, 58%, 0.14)", number: "hsl(186, 94%, 76%)" },
+  { bg: "hsla(244, 88%, 60%, 0.14)", number: "hsl(244, 94%, 78%)" },
+  { bg: "hsla(124, 88%, 58%, 0.14)", number: "hsl(124, 94%, 76%)" }
+];
+
 function getBlockSeatColor(blockId) {
-  const hue = (blockId * 137.508) % 360;
-  return `hsla(${hue}, 85%, 62%, 0.14)`;
+  return GROUP_SEAT_COLOR_PALETTE[blockId % GROUP_SEAT_COLOR_PALETTE.length].bg;
 }
 
 function getBlockSeatNumberColor(blockId) {
-  const hue = (blockId * 137.508) % 360;
-  return `hsl(${hue}, 92%, 74%)`;
+  return GROUP_SEAT_COLOR_PALETTE[blockId % GROUP_SEAT_COLOR_PALETTE.length].number;
 }
 
 function getSoloSeatNumberColor() {
@@ -177,6 +186,14 @@ function formatSeatRange(seatNumbers) {
   }
 
   return `${seatNumbers[0]}번 ~ ${seatNumbers[seatNumbers.length - 1]}번`;
+}
+
+function formatSeatCellName(label) {
+  if (label.length <= 4) {
+    return label;
+  }
+
+  return `${label.slice(0, 4)}<br>${label.slice(4)}`;
 }
 
 function formatSeatNumberGroups(seatNumbers) {
@@ -432,20 +449,20 @@ function findArcLengthAtRadians(arcTable, targetRadians) {
 
 function buildSeatPositions(totalSeats) {
   const seatPlacementRadius = getSeatPlacementRadius(totalSeats);
-  const seatStep = totalSeats > 0 ? (Math.PI * 2) / totalSeats : 0;
-  const startAngle = (seatStep / 2) - (Math.PI / 2);
-  const horizontalRadius = seatPlacementRadius;
-  const verticalRadius = seatPlacementRadius;
+  const horizontalRadius = seatPlacementRadius * 0.94;
+  const verticalRadius = seatPlacementRadius * 1.09;
+  const arcTable = buildEllipseArcTable(horizontalRadius, verticalRadius);
+  const seatSpacing = totalSeats > 0 ? arcTable.totalLength / totalSeats : 0;
+  const startLength = findArcLengthAtRadians(arcTable, -Math.PI / 2) + (seatSpacing / 2);
 
   return Array.from({ length: totalSeats }, (_, index) => {
-    const angle = startAngle + (index * seatStep);
-    const normalizedAngle = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const point = sampleEllipseAtLength(arcTable, startLength + (index * seatSpacing));
 
     return {
-      angle: (normalizedAngle * 180) / Math.PI,
-      radians: normalizedAngle,
-      x: 50 + (horizontalRadius * Math.cos(normalizedAngle)),
-      y: 50 + (verticalRadius * Math.sin(normalizedAngle))
+      angle: (point.radians * 180) / Math.PI,
+      radians: point.radians,
+      x: 50 + point.x,
+      y: 50 + point.y
     };
   });
 }
@@ -781,6 +798,7 @@ function renderResult(result) {
     ${result.seatMap.map((seat, index) => {
     const seatNumber = index + 1;
     const label = seat.kind === "empty" ? "빈 좌석" : seat.member || seat.name;
+    const displayLabel = formatSeatCellName(label);
     const position = calculateSeatPosition(index, seatCount);
     const blockColorStyle = seat.kind === "empty"
       ? "--seat-number-color: var(--muted);"
@@ -788,13 +806,92 @@ function renderResult(result) {
           ? `--seat-cell-bg: ${getSoloSeatColor()}; --seat-number-color: ${getSoloSeatNumberColor()};`
           : `--seat-cell-bg: ${getBlockSeatColor(seat.blockId)}; --seat-number-color: ${getBlockSeatNumberColor(seat.blockId)};`;
     return `
-      <div class="seat-cell ${seat.kind}" style="left: ${position.x}%; top: ${position.y}%; ${blockColorStyle}">
+      <div class="seat-cell ${seat.kind}" role="button" tabindex="0" aria-pressed="false" aria-label="${seatNumber}번 ${label}" style="left: ${position.x}%; top: ${position.y}%; ${blockColorStyle}">
         <span class="seat-cell-number">${seatNumber}번</span>
-        <span class="seat-cell-name">${label}</span>
+        <span class="seat-cell-name">${displayLabel}</span>
       </div>
     `;
   }).join("")}
   `;
+
+  const seatCells = Array.from(seatMap.querySelectorAll(".seat-cell"));
+  let selectedSeatCell = null;
+  let selectedSeatTimer = null;
+  let seatPopupLayer = getElement("seatPopupLayer");
+
+  if (!seatPopupLayer) {
+    seatPopupLayer = document.createElement("div");
+    seatPopupLayer.id = "seatPopupLayer";
+    seatPopupLayer.className = "seat-selection-overlay";
+    document.body.appendChild(seatPopupLayer);
+  }
+
+  const clearSelectedSeat = () => {
+    if (!selectedSeatCell) {
+      return;
+    }
+
+    if (selectedSeatTimer) {
+      clearTimeout(selectedSeatTimer);
+      selectedSeatTimer = null;
+    }
+
+    seatPopupLayer.innerHTML = "";
+    selectedSeatCell.setAttribute("aria-pressed", "false");
+    selectedSeatCell = null;
+  };
+
+  const selectSeatCell = (seatCell) => {
+    if (selectedSeatCell === seatCell) {
+      clearSelectedSeat();
+    }
+
+    clearSelectedSeat();
+    selectedSeatCell = seatCell;
+    selectedSeatCell.setAttribute("aria-pressed", "true");
+
+    const seatRect = seatCell.getBoundingClientRect();
+    const popupSeat = seatCell.cloneNode(true);
+    popupSeat.removeAttribute("id");
+    popupSeat.classList.add("seat-popup");
+    popupSeat.classList.add("is-selected");
+    popupSeat.setAttribute("aria-pressed", "true");
+    popupSeat.style.left = `${seatRect.left + (seatRect.width / 2)}px`;
+    popupSeat.style.top = `${seatRect.top + (seatRect.height / 2)}px`;
+    seatPopupLayer.appendChild(popupSeat);
+
+    selectedSeatTimer = setTimeout(() => {
+      clearSelectedSeat();
+    }, 1200);
+  };
+
+  seatMap.addEventListener("pointerdown", (event) => {
+    const seatCell = event.target.closest(".seat-cell");
+
+    if (!seatCell || !seatMap.contains(seatCell)) {
+      clearSelectedSeat();
+      return;
+    }
+
+    selectSeatCell(seatCell);
+  });
+
+  seatMap.addEventListener("pointerup", clearSelectedSeat);
+  seatMap.addEventListener("pointercancel", clearSelectedSeat);
+  seatMap.addEventListener("pointerleave", clearSelectedSeat);
+
+  seatMap.addEventListener("keydown", (event) => {
+    const seatCell = event.target.closest(".seat-cell");
+
+    if (!seatCell || !seatMap.contains(seatCell)) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectSeatCell(seatCell);
+    }
+  });
 }
 
 function handleSettingsPage() {

@@ -630,7 +630,7 @@ button {
   width: min(100%, 520px);
   aspect-ratio: 0.6181818182;
   margin: 0 auto;
-  transform: scaleX(1.1);
+  transform: scaleX(1);
   transform-origin: center;
   border-radius: 50%;
   overflow: hidden;
@@ -656,14 +656,14 @@ button {
 
 .seat-map::before {
   border-color: rgba(255, 80, 80, 0.45);
-  transform: scaleX(0.94);
+  transform: scale(0.94, 1.09);
   transform-origin: center;
 }
 
 .seat-map::after {
   inset: 20%;
   border-color: rgba(126, 224, 255, 0.12);
-  transform: scaleY(1.16);
+  transform: scaleY(1.28);
   transform-origin: center;
 }
 
@@ -723,6 +723,11 @@ button {
   z-index: 2;
   backdrop-filter: blur(10px);
   box-shadow: 0 14px 26px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, border-color 0.18s ease;
+  will-change: transform;
 }
 
 .seat-cell-number {
@@ -762,6 +767,28 @@ button {
 
 .seat-cell.solo {
   background: var(--seat-cell-bg, rgba(255, 255, 255, 0.05));
+}
+
+.seat-cell.is-selected {
+  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 8;
+  box-shadow: 0 24px 42px rgba(0, 0, 0, 0.42);
+  border-color: rgba(255, 255, 255, 0.34);
+  filter: brightness(1.08) saturate(1.08);
+}
+
+.seat-selection-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.seat-popup {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.2);
 }
 
 .empty-state {
@@ -829,7 +856,7 @@ button {
   }
 
   .seat-map {
-    width: min(100%, 432px);
+    width: min(calc(100% - 24px), 432px);
   }
 
   .seat-map-core {
@@ -859,7 +886,7 @@ button {
 
 @media (max-width: 520px) {
   .seat-map {
-    width: min(100%, 432px);
+    width: min(calc(100% - 20px), 432px);
   }
 
   .seat-map-core {
