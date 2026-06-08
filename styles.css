@@ -523,8 +523,12 @@ button {
 }
 
 .result-summary-grid .stat-card span {
-  font-size: 0.82rem;
+  font-size: 0.66rem;
   line-height: 1.2;
+}
+
+.result-summary-grid .stat-card strong {
+  font-size: 1.46rem;
 }
 
 .stat-card strong {
