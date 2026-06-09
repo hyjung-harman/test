@@ -109,6 +109,33 @@ function parseSeparatedSeats(text, totalSeats) {
   return [...seatSet].sort((left, right) => left - right);
 }
 
+function sanitizeSeparatedSeatsInput(text, totalSeats) {
+  const sanitizedParts = [];
+  let changed = false;
+  const numericPattern = /\d+/g;
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(numericPattern)) {
+    sanitizedParts.push(text.slice(lastIndex, match.index));
+
+    const seatNumber = Number.parseInt(match[0], 10);
+    if (Number.isInteger(seatNumber) && seatNumber >= 1 && seatNumber <= totalSeats) {
+      sanitizedParts.push(match[0]);
+    } else {
+      changed = true;
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  sanitizedParts.push(text.slice(lastIndex));
+
+  return {
+    text: sanitizedParts.join(""),
+    changed
+  };
+}
+
 function getRandomInt(maxExclusive) {
   if (maxExclusive <= 1) {
     return 0;
@@ -589,7 +616,7 @@ function buildBlocks(settings) {
   const blocks = [];
 
   settings.groupTeams.forEach((members, index) => {
-    blocks.push({ kind: "group", title: `단체팀 ${index + 1}`, members, size: members.length, label: `단체팀 ${index + 1}` });
+    blocks.push({ kind: "group", title: `단체팀 ${index + 1}`, members: shuffle(members), size: members.length, label: `단체팀 ${index + 1}` });
   });
 
   settings.soloMembers.forEach((name) => {
@@ -649,7 +676,7 @@ function generateResult(settings) {
   const totalPeople = groupPeople + settings.soloMembers.length;
 
   const teamBlocks = orderBlocksBySize([
-    ...settings.groupTeams.map((members, index) => ({ blockId: index, kind: "group", title: `단체팀 ${index + 1}`, members, size: members.length, label: `단체팀 ${index + 1}` }))
+    ...settings.groupTeams.map((members, index) => ({ blockId: index, kind: "group", title: `단체팀 ${index + 1}`, members: shuffle(members), size: members.length, label: `단체팀 ${index + 1}` }))
   ]);
   const soloBlocks = shuffle(settings.soloMembers.map((name, index) => ({ blockId: settings.groupTeams.length + index, kind: "solo", title: name, members: [name], size: 1, label: name })));
   const blocks = [...teamBlocks, ...soloBlocks];
@@ -791,6 +818,9 @@ function renderResult(result) {
   const seatCount = result.seatMap.length;
 
   seatMap.innerHTML = `
+    <div class="seat-map-bg" aria-hidden="true">
+      <img src="image/u1.png" alt="">
+    </div>
     <div class="seat-map-core glass" id="seatMapCore">
       <span id="seatMapCoreLabel">Boat Deck</span>
       <strong id="seatMapCoreValue">${result.totalSeats}석</strong>
@@ -918,6 +948,48 @@ function handleSettingsPage() {
   const message = getElement("formMessage");
   const overlay = getElement("loadingOverlay");
   const resetButton = getElement("resetButton");
+  const separatedSeatsInput = getElement("separatedSeats");
+  const totalSeatsInput = getElement("totalSeats");
+
+  const refreshTotalSeatsInput = () => {
+    const totalSeats = Number.parseInt(totalSeatsInput.value, 10);
+
+    if (!Number.isInteger(totalSeats)) {
+      return;
+    }
+
+    if (totalSeats < 5) {
+      totalSeatsInput.value = "5";
+      message.textContent = "전체 좌석수는 5보다 작게 입력할 수 없습니다.";
+      message.style.color = "var(--danger)";
+      return;
+    }
+
+    if (totalSeats > 22) {
+      totalSeatsInput.value = "22";
+      message.textContent = "전체 좌석수는 22를 넘길 수 없습니다.";
+      message.style.color = "var(--danger)";
+    }
+  };
+
+  const refreshSeparatedSeatsInput = () => {
+    const totalSeats = Number.parseInt(totalSeatsInput.value, 10);
+
+    if (!Number.isInteger(totalSeats)) {
+      return;
+    }
+
+    const currentValue = separatedSeatsInput.value;
+    const result = sanitizeSeparatedSeatsInput(currentValue, totalSeats);
+
+    if (!result.changed) {
+      return;
+    }
+
+    separatedSeatsInput.value = result.text;
+    message.textContent = "총 좌석수를 넘는 숫자는 입력 불가능 합니다.";
+    message.style.color = "var(--danger)";
+  };
 
   resetButton.addEventListener("click", () => {
     form.reset();
@@ -925,6 +997,10 @@ function handleSettingsPage() {
     localStorage.removeItem(RESULT_KEY);
     message.textContent = "설정이 초기화되었습니다.";
   });
+
+  totalSeatsInput.addEventListener("input", refreshTotalSeatsInput);
+  separatedSeatsInput.addEventListener("input", refreshSeparatedSeatsInput);
+  totalSeatsInput.addEventListener("input", refreshSeparatedSeatsInput);
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -969,7 +1045,7 @@ function handleSettingsPage() {
 
       localStorage.setItem(RESULT_KEY, JSON.stringify(result));
       window.location.href = "result.html";
-    }, 5000);
+    }, 10000);
   });
 }
 
