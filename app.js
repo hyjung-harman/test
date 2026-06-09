@@ -952,23 +952,23 @@ function handleSettingsPage() {
   const totalSeatsInput = getElement("totalSeats");
 
   const refreshTotalSeatsInput = () => {
+    const digitsOnly = totalSeatsInput.value.replace(/\D+/g, "");
+
+    if (digitsOnly !== totalSeatsInput.value) {
+      totalSeatsInput.value = digitsOnly;
+    }
+
     const totalSeats = Number.parseInt(totalSeatsInput.value, 10);
 
-    if (!Number.isInteger(totalSeats)) {
+    if (!totalSeatsInput.value) {
       return;
     }
 
-    if (totalSeats < 5) {
-      totalSeatsInput.value = "5";
-      message.textContent = "전체 좌석수는 5보다 작게 입력할 수 없습니다.";
+    if (!Number.isInteger(totalSeats) || totalSeats < 5 || totalSeats > 22) {
+      message.textContent = "전체 좌석수는 5~22 사이 숫자로 입력해 주세요.";
       message.style.color = "var(--danger)";
-      return;
-    }
-
-    if (totalSeats > 22) {
-      totalSeatsInput.value = "22";
-      message.textContent = "전체 좌석수는 22를 넘길 수 없습니다.";
-      message.style.color = "var(--danger)";
+    } else {
+      message.textContent = "";
     }
   };
 
@@ -1014,6 +1014,12 @@ function handleSettingsPage() {
     };
 
     settings.separatedSeatSet = new Set(settings.separatedSeats);
+
+    if (!Number.isInteger(settings.totalSeats) || settings.totalSeats < 5 || settings.totalSeats > 22) {
+      message.textContent = "전체 좌석수는 5~22 사이 숫자로 입력해 주세요.";
+      message.style.color = "var(--danger)";
+      return;
+    }
 
     const error = validateSettings(settings);
     if (error) {
