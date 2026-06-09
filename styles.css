@@ -192,6 +192,7 @@ button {
 .hero-visual {
   flex: 0 0 clamp(96px, 12.8vw, 141px);
   max-width: clamp(96px, 12.8vw, 141px);
+  align-self: flex-start;
   position: relative;
   display: flex;
   align-items: center;
@@ -301,10 +302,6 @@ button {
   gap: 20px;
 }
 
-.guide-panel {
-  position: relative;
-}
-
 .map-panel {
   padding: 18px 20px;
   gap: 14px;
@@ -370,14 +367,10 @@ button {
 }
 
 .page-settings .guide-image-wrap {
-  position: absolute;
-  left: 50%;
-  bottom: 7px;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  transform: translateX(-50%);
-  width: 100%;
+  align-items: center;
+  margin-top: auto;
   pointer-events: none;
 }
 
@@ -1073,18 +1066,24 @@ button {
     max-height: 96px;
   }
 
-  .page-settings .guide-panel {
-    min-height: 360px;
-    padding-bottom: 160px;
-  }
-
-  .page-settings .guide-image-wrap {
-    bottom: 4px;
-  }
-
   .page-settings .guide-image {
     width: min(220px, 74%);
     max-height: 132px;
+  }
+
+  .page-settings .settings-footer .actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .page-settings .settings-footer .actions .ghost-btn,
+  .page-settings .settings-footer .actions .primary-btn {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px 10px;
+    font-size: 0.94rem;
+    min-height: 44px;
   }
 
   .two-col,
