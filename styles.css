@@ -131,8 +131,9 @@ button {
 
 .result-header h1 {
   margin: 0;
-  font-size: clamp(1.05rem, 1.65vw, 1.6rem);
+  font-size: clamp(1.26rem, 1.98vw, 1.92rem);
   line-height: 0.96;
+  white-space: nowrap;
 }
 
 .result-header {
@@ -808,7 +809,7 @@ button {
   max-width: 360px;
   max-height: 78%;
   object-fit: contain;
-  opacity: 0.1;
+  opacity: 0.2;
   filter: saturate(0.95) contrast(1.02);
 }
 
