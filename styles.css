@@ -1043,7 +1043,11 @@ button {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 6px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .result-header > div:first-child {
@@ -1055,13 +1059,14 @@ button {
     flex-direction: row;
     align-items: center;
     flex: 0 0 auto;
+    gap: 8px;
   }
 
   .result-header .ghost-btn,
   .result-header .link-btn {
     width: auto;
-    min-height: 40px;
-    padding: 10px 12px;
+    min-height: 34px;
+    padding: 6px 10px;
     font-size: 0.86rem;
     white-space: nowrap;
   }
