@@ -185,6 +185,10 @@ button {
   transform: translateY(0) scale(1.1);
 }
 
+.hero-link-url {
+  font-size: 0.8em;
+}
+
 .hero-visual {
   flex: 0 0 clamp(96px, 12.8vw, 141px);
   max-width: clamp(96px, 12.8vw, 141px);
@@ -1067,6 +1071,11 @@ button {
 
   .hero-visual img {
     max-height: 96px;
+  }
+
+  .page-settings .guide-panel {
+    min-height: 360px;
+    padding-bottom: 160px;
   }
 
   .page-settings .guide-image-wrap {
