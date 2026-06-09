@@ -1077,8 +1077,38 @@ function showStoredError() {
   message.style.color = "var(--danger)";
 }
 
+const settingsHighlightTimers = new WeakMap();
+
+function flashSettingsHighlight(element) {
+  if (!element) {
+    return;
+  }
+
+  element.classList.add("is-flashed");
+
+  const previousTimer = settingsHighlightTimers.get(element);
+  if (previousTimer) {
+    window.clearTimeout(previousTimer);
+  }
+
+  const timer = window.setTimeout(() => {
+    element.classList.remove("is-flashed");
+    settingsHighlightTimers.delete(element);
+  }, 500);
+
+  settingsHighlightTimers.set(element, timer);
+}
+
+function setupSettingsAutoResetHighlights() {
+  document.querySelectorAll(".page-settings .hero-link-note, .page-settings .hero-visual, .page-settings .guide-image-link").forEach((element) => {
+    element.addEventListener("pointerenter", () => flashSettingsHighlight(element));
+    element.addEventListener("click", () => flashSettingsHighlight(element));
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   if (getElement("settingsForm")) {
+    setupSettingsAutoResetHighlights();
     handleSettingsPage();
     showStoredError();
   }
