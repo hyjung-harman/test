@@ -1110,6 +1110,11 @@ button {
     margin-bottom: 10px;
   }
 
+  .page-settings .guide-image-link {
+    left: 5px;
+    top: 3px;
+  }
+
   .page-settings .settings-footer .actions {
     flex-wrap: nowrap;
     gap: 8px;
