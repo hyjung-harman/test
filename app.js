@@ -1,5 +1,6 @@
 const STORAGE_KEY = "boat-fishing-seat-selector-settings";
 const RESULT_KEY = "boat-fishing-seat-selector-result";
+let loadingTimerId = null;
 
 function getElement(id) {
   return document.getElementById(id);
@@ -15,6 +16,19 @@ function loadSettings() {
 
 function saveSettings(settings) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
+function resetLoadingOverlayState() {
+  const overlay = getElement("loadingOverlay");
+
+  if (overlay) {
+    overlay.hidden = true;
+  }
+
+  if (loadingTimerId !== null) {
+    window.clearTimeout(loadingTimerId);
+    loadingTimerId = null;
+  }
 }
 
 function splitTeamLine(line) {
@@ -992,6 +1006,7 @@ function handleSettingsPage() {
   };
 
   resetButton.addEventListener("click", () => {
+    resetLoadingOverlayState();
     form.reset();
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(RESULT_KEY);
@@ -1039,18 +1054,24 @@ function handleSettingsPage() {
     });
 
     overlay.hidden = false;
-    window.setTimeout(() => {
+    if (loadingTimerId !== null) {
+      window.clearTimeout(loadingTimerId);
+    }
+
+    loadingTimerId = window.setTimeout(() => {
       const result = generateResult(settings);
 
       if (result.error) {
         overlay.hidden = true;
         message.textContent = result.error;
         message.style.color = "var(--danger)";
+        loadingTimerId = null;
         return;
       }
 
       localStorage.setItem(RESULT_KEY, JSON.stringify(result));
       window.location.href = "result.html";
+      loadingTimerId = null;
     }, 10000);
   });
 }
@@ -1115,11 +1136,18 @@ function setupSettingsAutoResetHighlights() {
 document.addEventListener("DOMContentLoaded", () => {
   if (getElement("settingsForm")) {
     setupSettingsAutoResetHighlights();
+    resetLoadingOverlayState();
     handleSettingsPage();
     showStoredError();
   }
 
   if (getElement("seatList") && getElement("seatMap")) {
     handleResultPage();
+  }
+});
+
+window.addEventListener("pageshow", () => {
+  if (getElement("settingsForm")) {
+    resetLoadingOverlayState();
   }
 });
