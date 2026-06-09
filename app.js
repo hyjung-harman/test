@@ -838,12 +838,13 @@ function renderResult(result) {
     <div class="seat-map-core glass" id="seatMapCore">
       <span id="seatMapCoreLabel">Boat Deck</span>
       <strong id="seatMapCoreValue">${result.totalSeats}석</strong>
-      <small id="seatMapCoreDetail">좌석을 누르면 정보가 표시됩니다.</small>
+      <small id="seatMapCoreDetail">좌석을 누르면 여기 표시됩니다.</small>
     </div>
     ${result.seatMap.map((seat, index) => {
     const seatNumber = index + 1;
     const label = seat.kind === "empty" ? "빈 좌석" : seat.member || seat.name;
     const displayLabel = formatSeatCellName(label);
+    const seatCellNameClass = displayLabel.includes("<br>") ? "seat-cell-name is-multiline" : "seat-cell-name";
     const position = calculateSeatPosition(index, seatCount);
     const blockColorStyle = seat.kind === "empty"
       ? "--seat-number-color: var(--muted);"
@@ -853,7 +854,7 @@ function renderResult(result) {
     return `
       <div class="seat-cell ${seat.kind}" role="button" tabindex="0" aria-pressed="false" aria-label="${seatNumber}번 ${label}" data-seat-number="${seatNumber}" data-seat-label="${label}" data-seat-kind="${seat.kind}" style="left: ${position.x}%; top: ${position.y}%; ${blockColorStyle}">
         <span class="seat-cell-number">${seatNumber}번</span>
-        <span class="seat-cell-name">${displayLabel}</span>
+        <span class="${seatCellNameClass}">${displayLabel}</span>
       </div>
     `;
   }).join("")}
@@ -865,7 +866,9 @@ function renderResult(result) {
   const seatMapCore = getElement("seatMapCore");
   const seatCells = Array.from(seatMap.querySelectorAll(".seat-cell"));
   let selectedSeatCell = null;
+  let hoveredSeatCell = null;
   let selectedSeatTimer = null;
+  let seatCoreTimer = null;
   let seatPopupLayer = getElement("seatPopupLayer");
 
   if (!seatPopupLayer) {
@@ -875,8 +878,56 @@ function renderResult(result) {
     document.body.appendChild(seatPopupLayer);
   }
 
+  const getSeatCoreInfo = (seatCell) => ({
+    seatNumber: seatCell.dataset.seatNumber ?? "",
+    seatLabel: seatCell.dataset.seatLabel ?? "",
+    seatKind: seatCell.dataset.seatKind ?? ""
+  });
+
+  const showSeatCoreInfo = (seatCell) => {
+    if (!seatCell) {
+      return;
+    }
+
+    const { seatNumber, seatLabel, seatKind } = getSeatCoreInfo(seatCell);
+
+    seatMapCore.classList.add("is-seat-selected");
+    seatMapCoreLabel.textContent = seatKind === "solo" ? "솔로 좌석" : seatKind === "group" ? "단체 좌석" : seatKind === "family" ? "가족 좌석" : "빈 좌석";
+    seatMapCoreValue.textContent = `${seatNumber}번`;
+    seatMapCoreDetail.textContent = seatLabel;
+  };
+
+  const resetSeatCoreInfo = () => {
+    seatMapCore.classList.remove("is-seat-selected");
+    seatMapCoreLabel.textContent = "Boat Deck";
+    seatMapCoreValue.textContent = `${result.totalSeats}석`;
+    seatMapCoreDetail.textContent = "좌석을 누르면 여기 표시됩니다.";
+  };
+
+  const clearSeatCoreTimer = () => {
+    if (seatCoreTimer) {
+      clearTimeout(seatCoreTimer);
+      seatCoreTimer = null;
+    }
+  };
+
+  const scheduleSeatCoreReset = () => {
+    clearSeatCoreTimer();
+
+    seatCoreTimer = setTimeout(() => {
+      seatCoreTimer = null;
+      hoveredSeatCell = null;
+      clearSelectedSeat();
+      resetSeatCoreInfo();
+    }, 1000);
+  };
+
   const clearSelectedSeat = () => {
     if (!selectedSeatCell) {
+      if (!hoveredSeatCell) {
+        resetSeatCoreInfo();
+      }
+
       return;
     }
 
@@ -885,13 +936,18 @@ function renderResult(result) {
       selectedSeatTimer = null;
     }
 
+    clearSeatCoreTimer();
+
     seatPopupLayer.innerHTML = "";
     selectedSeatCell.setAttribute("aria-pressed", "false");
-    seatMapCore.classList.remove("is-seat-selected");
-    seatMapCoreLabel.textContent = "Boat Deck";
-    seatMapCoreValue.textContent = `${result.totalSeats}석`;
-    seatMapCoreDetail.textContent = "좌석을 누르면 정보가 표시됩니다.";
     selectedSeatCell = null;
+
+    if (hoveredSeatCell) {
+      showSeatCoreInfo(hoveredSeatCell);
+      return;
+    }
+
+    resetSeatCoreInfo();
   };
 
   const selectSeatCell = (seatCell) => {
@@ -902,14 +958,8 @@ function renderResult(result) {
     clearSelectedSeat();
     selectedSeatCell = seatCell;
     selectedSeatCell.setAttribute("aria-pressed", "true");
-
-  const seatNumber = seatCell.dataset.seatNumber ?? "";
-  const seatLabel = seatCell.dataset.seatLabel ?? "";
-  const seatKind = seatCell.dataset.seatKind ?? "";
-  seatMapCore.classList.add("is-seat-selected");
-  seatMapCoreLabel.textContent = seatKind === "solo" ? "솔로 좌석" : seatKind === "group" ? "단체 좌석" : seatKind === "family" ? "가족 좌석" : "빈 좌석";
-  seatMapCoreValue.textContent = `${seatNumber}번`;
-  seatMapCoreDetail.textContent = seatLabel;
+    hoveredSeatCell = seatCell;
+    showSeatCoreInfo(seatCell);
 
     const seatRect = seatCell.getBoundingClientRect();
     const popupSeat = seatCell.cloneNode(true);
@@ -921,10 +971,24 @@ function renderResult(result) {
     popupSeat.style.top = `${seatRect.top + (seatRect.height / 2)}px`;
     seatPopupLayer.appendChild(popupSeat);
 
-    selectedSeatTimer = setTimeout(() => {
-      clearSelectedSeat();
-    }, 1200);
+    scheduleSeatCoreReset();
   };
+
+  seatMap.addEventListener("pointerover", (event) => {
+    const seatCell = event.target.closest(".seat-cell");
+
+    if (!seatCell || !seatMap.contains(seatCell)) {
+      return;
+    }
+
+    if (hoveredSeatCell === seatCell) {
+      return;
+    }
+
+    hoveredSeatCell = seatCell;
+    showSeatCoreInfo(seatCell);
+    scheduleSeatCoreReset();
+  });
 
   seatMap.addEventListener("pointerdown", (event) => {
     const seatCell = event.target.closest(".seat-cell");
@@ -937,9 +1001,9 @@ function renderResult(result) {
     selectSeatCell(seatCell);
   });
 
-  seatMap.addEventListener("pointerup", clearSelectedSeat);
-  seatMap.addEventListener("pointercancel", clearSelectedSeat);
-  seatMap.addEventListener("pointerleave", clearSelectedSeat);
+  seatMap.addEventListener("pointerleave", () => {
+    hoveredSeatCell = null;
+  });
 
   seatMap.addEventListener("keydown", (event) => {
     const seatCell = event.target.closest(".seat-cell");
