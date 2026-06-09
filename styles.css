@@ -186,8 +186,8 @@ button {
 }
 
 .hero-visual {
-  flex: 0 0 clamp(120px, 16vw, 176px);
-  max-width: clamp(120px, 16vw, 176px);
+  flex: 0 0 clamp(96px, 12.8vw, 141px);
+  max-width: clamp(96px, 12.8vw, 141px);
   position: relative;
   display: flex;
   align-items: center;
@@ -201,7 +201,7 @@ button {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 128px;
+  max-height: 102px;
   object-fit: contain;
   filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.24));
 }
@@ -1067,6 +1067,15 @@ button {
 
   .hero-visual img {
     max-height: 96px;
+  }
+
+  .page-settings .guide-image-wrap {
+    bottom: 4px;
+  }
+
+  .page-settings .guide-image {
+    width: min(220px, 74%);
+    max-height: 132px;
   }
 
   .two-col,
