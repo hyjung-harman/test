@@ -1067,8 +1067,12 @@ button {
   }
 
   .page-settings .guide-image {
-    width: min(220px, 74%);
-    max-height: 132px;
+    width: min(264px, 88.8%);
+    max-height: 158px;
+  }
+
+  .page-settings .guide-image-wrap {
+    margin-bottom: 10px;
   }
 
   .page-settings .settings-footer .actions {
@@ -1117,6 +1121,13 @@ button {
   .ghost-btn,
   .link-btn {
     width: 100%;
+  }
+
+  .page-settings .settings-footer .actions .ghost-btn,
+  .page-settings .settings-footer .actions .primary-btn {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
   }
 }
 
