@@ -186,8 +186,8 @@ button {
 }
 
 .hero-visual {
-  flex: 0 0 clamp(150px, 20vw, 220px);
-  max-width: clamp(150px, 20vw, 220px);
+  flex: 0 0 clamp(120px, 16vw, 176px);
+  max-width: clamp(120px, 16vw, 176px);
   position: relative;
   display: flex;
   align-items: center;
@@ -201,7 +201,7 @@ button {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 160px;
+  max-height: 128px;
   object-fit: contain;
   filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.24));
 }
@@ -1047,6 +1047,26 @@ button {
   .header-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .hero-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .hero-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .hero-visual {
+    flex: 0 0 clamp(88px, 26vw, 122px);
+    max-width: clamp(88px, 26vw, 122px);
+  }
+
+  .hero-visual img {
+    max-height: 96px;
   }
 
   .two-col,
