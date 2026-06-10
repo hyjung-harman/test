@@ -859,6 +859,8 @@ button {
   aspect-ratio: 1;
   border-radius: 50%;
   padding: 18px;
+  box-sizing: border-box;
+  overflow: hidden;
   display: grid;
   place-items: center;
   text-align: center;
@@ -877,6 +879,10 @@ button {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .seat-map-core strong {
@@ -886,12 +892,19 @@ button {
   font-weight: 800;
   letter-spacing: -0.04em;
   text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   transform: translateY(-8px);
 }
 
 .seat-map-core small {
   color: var(--muted);
   line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: color 0.18s ease, font-size 0.18s ease, letter-spacing 0.18s ease, font-weight 0.18s ease;
 }
 
@@ -1239,6 +1252,20 @@ button {
   .seat-map-core {
     width: clamp(112px, 42%, 150px);
     padding: 14px;
+  }
+
+  .seat-map-core span {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+  }
+
+  .seat-map-core strong {
+    font-size: 1.18rem;
+  }
+
+  .seat-map-core small {
+    font-size: 0.74rem;
+    line-height: 1.28;
   }
 
   .seat-cell-number {
